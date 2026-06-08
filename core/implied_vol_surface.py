@@ -57,3 +57,33 @@ plt.show()
 
 filtered = iv_df[(iv_df['strike'] > spot * 0.80) & (iv_df['strike'] < spot * 1.20)]
 plt.plot(filtered['strike'], filtered['iv'] * 100)
+
+plt.figure(figsize=(12, 6))
+
+for i in [4, 6, 8]:  # three different expiries
+    exp = ticker.options[i]
+    chain = ticker.option_chain(exp)
+    calls = chain.calls
+    
+    expiry_date = datetime.strptime(exp, "%Y-%m-%d")
+    T_exp = (expiry_date - datetime.today()).days / 365
+    
+    results = []
+    for _, row in calls.iterrows():
+        strike = row['strike']
+        mid = row['lastPrice'] if (row['bid']==0 and row['ask']==0) else (row['bid']+row['ask'])/2
+        if mid > 0:
+            iv = implied_vol(mid, spot, strike, T_exp, r, option_type='call')
+            results.append({'strike': strike, 'iv': iv})
+    
+    df = pd.DataFrame(results)
+    filtered = df[(df['strike'] > spot*0.80) & (df['strike'] < spot*1.20)]
+    plt.plot(filtered['strike'], filtered['iv']*100, label=exp)
+
+plt.axvline(x=spot, color='red', linestyle='--', label=f'Spot: ${spot:.0f}')
+plt.xlabel('Strike')
+plt.ylabel('Implied Volatility (%)')
+plt.title('SPY Vol Surface — Multiple Expiries')
+plt.legend()
+plt.grid(True)
+plt.show()
