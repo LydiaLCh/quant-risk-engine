@@ -54,3 +54,6 @@ plt.title(f'SPY Implied Volatility Surface — Expiry {expiry}')
 plt.legend()
 plt.grid(True)
 plt.show()
+
+filtered = iv_df[(iv_df['strike'] > spot * 0.80) & (iv_df['strike'] < spot * 1.20)]
+plt.plot(filtered['strike'], filtered['iv'] * 100)
